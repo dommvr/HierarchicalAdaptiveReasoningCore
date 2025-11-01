@@ -10,9 +10,9 @@ class TransformerEncoderLayer(nn.Module):
         self.norm2 = nn.LayerNorm(dim)
 
     def forward(self, x, mask=None):
-        attn_out, _ = self.attn(x, x, x, key_padding_mask=mask)
-        x = self.norm1(x + attn_out)
-        x = self.norm2(x + self.ff(x))
+        attn_out, _ = self.attn(self.norm1(x), self.norm1(x), self.norm1(x), key_padding_mask=mask)
+        x = x + attn_out
+        x = x + self.ff(self.norm2(x))
         return x
     
 
@@ -28,10 +28,10 @@ class TransformerDecoderLayer(nn.Module):
         self.norm3 = nn.LayerNorm(dim)
 
     def forward(self, x, memory, tgt_mask=None, mean_mask=None):
-        self_attn_out, _ = self.self_attn(x, x, x, attn_mask=tgt_mask)
-        x = self.norm1(x + self_attn_out)
+        self_attn_out, _ = self.self_attn(self.norm1(x), self.norm1(x), self.norm1(x), attn_mask=tgt_mask)
+        x = x + self_attn_out
 
-        cross_attn_out, _ = self.cross_attn(x, memory, memory, key_padding_mask=mean_mask)
-        x = self.norm2(x + cross_attn_out)
-        x = self.norm3(x + self.ff(x))
+        cross_attn_out, _ = self.cross_attn(self.norm2(x), memory, memory, key_padding_mask=mean_mask)
+        x = x + cross_attn_out
+        x = x + self.ff(self.norm3(x))
         return x
