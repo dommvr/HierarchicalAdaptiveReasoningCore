@@ -3,7 +3,7 @@ import torch.nn as nn
 from harc.modules.transformer_layers import TransformerDecoderLayer
     
 
-class Decoder(nn.Module):
+class ThoughtDecoder(nn.Module):
     def __init__(self, vocab_size, d_model=512, n_layers=4, n_heads=8, max_len=128, dropout=0.1):
         super().__init__()
         self.token_emb = nn.Embedding(vocab_size, d_model)
@@ -20,7 +20,8 @@ class Decoder(nn.Module):
         """
         B, L_t = tgt_tokens.shape
         x = self.token_emb(tgt_tokens) + self.pos_emb[:, :L_t, :]
+        memory = frozen_slots.flatten(1, 3).view(B, -1, frozen_slots.size(-1)) # (B, G*K*2, d)
         for layer in self.layers:
-            x = layer(x, frozen_slots, tgt_mask=tgt_mask)
+            x = layer(x, memory, tgt_mask=tgt_mask)
         logits = self.to_logits(x)
         return logits

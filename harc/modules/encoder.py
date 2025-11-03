@@ -5,7 +5,7 @@ from harc.modules import FeedForward
 from harc.modules.transformer_layers import TransformerEncoderLayer
 
 
-class Encoder(nn.Module):
+class ThoughtEncoder(nn.Module):
     def __init__(self, vocab_size, d_model=512, n_layers=4, n_heads=8, max_len=512, G=3, K=4, dropout=0.1):
         super().__init__()
         self.token_emb = nn.Embedding(vocab_size, d_model)
